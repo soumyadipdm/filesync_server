@@ -3,17 +3,17 @@ filesync_server
 ===============
 
 
-Add a short description here!
+A semi-p2p file sync service
 
 
 Description
 ===========
 
-A longer description of your project goes here...
+A semi-p2p file sync service using grpc, protobuf and etcd. Currently heavily WIP.
+
+Design, usage etc. are yet to come. So watch for this space!
 
 
 Note
 ====
 
-This project has been set up using PyScaffold 3.0.3. For details and usage
-information on PyScaffold see http://pyscaffold.org/.

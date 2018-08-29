@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package filesyncrpc;
+
+// Interface exported by the server.
+service FileSyncRpc {
+    // A simple RPC.
+    //
+    // Obtains patch of the given file
+    rpc GetPatch(File) returns (Patch) {}
+}
+
+
+// Checksum of blocks or entire file
+message Checksum {
+    string checksum = 1;
+}
+
+// Client side file's name, checksum, block size and block checksums
+message File {
+    string name = 1;
+    Checksum checksum = 2;
+    uint32 blocksize = 3;
+    repeated Checksum blockcsums = 4;
+}
+
+// A block of a file containing block number, checksum of
+// the block, and binary data of the block
+message Block {
+    uint64 number = 1;
+    Checksum checksum = 2;
+    bytes data = 3;
+    uint64 existing = 4;
+}
+
+// Patch of a file containing name, checksum of the file,
+// block number and corresponding checksum,
+// actual data of the block.
+message Patch {
+    string name = 1;
+    Checksum checksum = 2;
+    repeated Block blocks = 3;
+}

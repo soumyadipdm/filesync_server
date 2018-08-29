@@ -14,7 +14,8 @@ from setuptools import setup
 # Add here console scripts and other entry points in ini-style format
 entry_points = """
 [console_scripts]
-# script_name = filesync_server.module:function
+server = filesync_server.server:main
+client = filesync_server.client:main
 # For example:
 # fibonacci = filesync_server.skeleton:run
 """

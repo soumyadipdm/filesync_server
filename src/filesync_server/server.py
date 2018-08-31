@@ -9,18 +9,10 @@ from concurrent import futures
 import filesync_server.pb.rpc_pb2 as rpc_pb2
 import filesync_server.pb.rpc_pb2_grpc as rpc_pb2_grpc
 import grpc
-from filesync_server.lib.file_util import FileObj
+from filesync_server.lib.file_util import ServedFile
+from filesync_server.lib.util import setup_logging
 
 log = logging.getLogger(__name__)
-
-
-def setup_logging():
-    """Set up logging"""
-    log.setLevel(logging.DEBUG)
-    sh = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    sh.setFormatter(formatter)
-    log.addHandler(sh)
 
 
 class Servicer(rpc_pb2_grpc.FileSyncRpcServicer):
@@ -28,12 +20,15 @@ class Servicer(rpc_pb2_grpc.FileSyncRpcServicer):
         log.debug("Servicing request for %s", request.name)
 
         filepath = os.path.join("/tmp", request.name)
-        fb = FileObj(filepath, blocksize=request.blocksize)
+        fb = ServedFile(filepath, blocksize=request.blocksize)
 
         if fb.checksum == request.checksum.checksum:
             # client already has the file, just return the checksum
-            return rpc_pb2.Patch(request.name,
-                                 rpc_pb2.Checksum(fb.checksum))
+            patch = rpc_pb2.Patch()
+            patch.name = request.name
+            patch.checksum.checksum = fb.checksum
+
+            return patch
 
         csums = [csum.checksum for csum in request.blockcsums]
         blocks_list = []
@@ -62,7 +57,7 @@ class Servicer(rpc_pb2_grpc.FileSyncRpcServicer):
 
 
 def main():
-    setup_logging()
+    setup_logging(log)
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
     rpc_pb2_grpc.add_FileSyncRpcServicer_to_server(Servicer(), server)
     server.add_insecure_port('[::]:50051')
